@@ -1,5 +1,3 @@
-import { flatIcons } from "../../presentation/pieces/IconCatalog";
-import Piece from "../../presentation/pieces/Piece";
 import {
   EMPTY,
   WHITE_BISHOP,
@@ -14,9 +12,7 @@ import {
   BLACK_PAWN,
   BLACK_ROOK,
   BLACK_KING,
-  WHITE_PIECE,
 } from "../domain/Pieces";
-import BehaviorFactory from "./BehaviorFactory";
 
 export const initialBlack = [
   BLACK_ROOK,
@@ -66,68 +62,31 @@ export function emptyBoard() {
   return Array.from({ length: 64 }, (_, index) => EMPTY);
 }
 
-export default class Game {
-  constructor() {
-    this.behaviorFactory = new BehaviorFactory(this);
+// function movePiece(to) {
+//   const behaviorFactory = this.behaviorFactory;
+//   const from = this.from;
 
-    this.board = initialBoard();
-    this.markers = emptyBoard();
+//   const piece = this.board[from];
+//   this.board[to] = piece;
+//   this.board[from] = EMPTY;
+  
+//   this.updateBoard(this.buildUIBoard(this.board));
+//   this.updateMarkers(this.markers);
+// }
 
-    this.uiDistribution = this.buildUIBoard(this.board);
-    this.uiMarkers = [];
-    
-    this.isWitheTurn = true;
-    this.from = -1;
-    this.posibleMoves = [];
-    
-    this.updateBoard = console.log;
-    this.updateMarkers = console.log;
-  }
 
-  buildUIBoard(board) {
-    const behaviorFactory = this.behaviorFactory;
-    return board.map((p, index)=>
-      Piece({icon: flatIcons[p], behavior: behaviorFactory.factory(p, index)}) 
-    );
-  }
+// onClick() {
+//   const posibleMoves = this.game.getPosibleMoves();
+//   console.log(posibleMoves);
 
-  getUIBoard() {
-    return this.uiDistribution;
-  }
-
-  getUIMarkers() {
-    return this.uiMarkers;
-  }
-
-  movePiece(to) {
-    const behaviorFactory = this.behaviorFactory;
-    const from = this.from;
-
-    const piece = this.board[from];
-    this.board[to] = piece;
-    this.board[from] = EMPTY;
-    
-    this.updateBoard(this.buildUIBoard(this.board));
-    this.updateMarkers(this.markers);
-  }
-
-  setPieceToMove(from) {
-    this.from = from;
-  }
-
-  setPosibleMoves(posibleMoves) {
-    this.posibleMoves = posibleMoves;
-  }
-
-  getPosibleMoves() {
-    return this.posibleMoves;
-  } 
-
-  setUpdateBoard(updateBoard) {
-    this.updateBoard = updateBoard;
-  }
-
-  setUpdateMarkers(markers) {
-    this.markers = markers;
-  }
-}
+//   if (posibleMoves.includes(this.position)) {
+//       console.log("position", this.position);
+//       this.game.movePiece(this.position);
+//       this.game.setPieceToMove(-1);
+//       this.game.setPosibleMoves([]);
+//   } else {
+//       console.log("actionArea", this.actionArea());
+//       this.game.setPieceToMove(this.position);
+//       this.game.setPosibleMoves(this.actionArea());
+//   }
+// }

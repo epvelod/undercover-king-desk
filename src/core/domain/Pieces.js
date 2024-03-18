@@ -36,7 +36,7 @@ export const MARKER_POSIBLE_OPTION = MARKERST + 2;
 export const MARKER_POSIBLE_WITH_ENEMY = MARKERST + 3;
 
 export function getName(pieceId) {
-  switch (pieceId % WHITE_PIECE % BLACK_PIECE) {
+  switch ((pieceId % WHITE_PIECE) % BLACK_PIECE) {
     case BISHOP:
       return bishop;
     case KNIGHT:
@@ -53,26 +53,26 @@ export function getName(pieceId) {
 }
 
 export function getPieceId(pieceName, pieceType) {
-    switch (pieceName) {
-      case bishop:
-        return BISHOP + pieceType;
-      case knight:
-        return KNIGHT + pieceType;
-      case queen:
-        return QUEEN + pieceType;
-      case pawn:
-        return PAWN + pieceType;
-      case rook:
-        return ROOK + pieceType;
-      case king:
-        return KING + pieceType;
-    }
+  switch (pieceName) {
+    case bishop:
+      return BISHOP + pieceType;
+    case knight:
+      return KNIGHT + pieceType;
+    case queen:
+      return QUEEN + pieceType;
+    case pawn:
+      return PAWN + pieceType;
+    case rook:
+      return ROOK + pieceType;
+    case king:
+      return KING + pieceType;
+  }
 }
 
 export function getPieceWithoutColor(pieceId) {
-    return pieceId % WHITE_PIECE % BLACK_PIECE;
+  return (pieceId % WHITE_PIECE) % BLACK_PIECE;
 }
 
 export function getPieceColor(pieceId) {
-    return pieceId >= BLACK_PIECE ? BLACK_PIECE : WHITE_PIECE;
+  return pieceId >= BLACK_PIECE ? BLACK_PIECE : WHITE_PIECE;
 }
