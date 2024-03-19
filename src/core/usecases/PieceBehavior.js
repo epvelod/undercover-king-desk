@@ -1,4 +1,4 @@
-import { BISHOP, EMPTY, KING, KNIGHT, PAWN, QUEEN, ROOK, getPieceColor } from "../domain/Pieces";
+import { BISHOP, BLACK_PIECE, EMPTY, KING, KNIGHT, PAWN, QUEEN, ROOK, WHITE_PIECE, getPieceColor } from "../domain/Pieces";
 
 export const LEFT = 0;
 export const RIGHT = 1;
@@ -69,7 +69,7 @@ export function availableMoves({
   return possibleMoves;
 }
 
-function pawnBehavior({ board, position, pieceId }) {
+function pawnBehavior({ board, position, pieceId, movements }) {
   const MAX_MOVEMENTS = 1;
   const direction = getPieceColor(pieceId) === WHITE_PIECE ? UP : DOWN;
   return availableMovesByDirection(
@@ -79,7 +79,7 @@ function pawnBehavior({ board, position, pieceId }) {
   );
 }
 
-function bishopBehavior({ board, position, pieceId }) {
+function bishopBehavior({ board, position, pieceId, movements }) {
   return [
     ...availableMovesByDirection({ board, position, pieceId }, LEFT_DOWN),
     ...availableMovesByDirection({ board, position, pieceId }, LEFT_UP),
@@ -88,7 +88,7 @@ function bishopBehavior({ board, position, pieceId }) {
   ];
 }
 
-function kingBehavior({ board, position, pieceId }) {
+function kingBehavior({ board, position, pieceId, movements }) {
   const MAX_MOVEMENTS = 1;
   return [
     ...availableMovesByDirection(
@@ -134,7 +134,7 @@ function kingBehavior({ board, position, pieceId }) {
   ];
 }
 
-function queenBehavior({ board, position, pieceId }) {
+function queenBehavior({ board, position, pieceId, movements }) {
   return [
     ...availableMovesByDirection({ board, position, pieceId }, UP),
     ...availableMovesByDirection({ board, position, pieceId }, DOWN),
@@ -147,7 +147,7 @@ function queenBehavior({ board, position, pieceId }) {
   ];
 }
 
-function rookBehavior({ board, position, pieceId }) {
+function rookBehavior({ board, position, pieceId, movements }) {
   return [
     ...availableMovesByDirection({ board, position, pieceId }, UP),
     ...availableMovesByDirection({ board, position, pieceId }, DOWN),
@@ -156,9 +156,9 @@ function rookBehavior({ board, position, pieceId }) {
   ];
 }
 
-function squareBehavior({ board, position, pieceId }) {}
+function squareBehavior({ board, position, pieceId, movements }) {}
 
-function strategyBehavior(pieceId) {
+export function pieceStrategyBehavior(pieceId) {
   switch (pieceId % WHITE_PIECE % BLACK_PIECE) {
     case BISHOP:
       return bishopBehavior;
@@ -172,5 +172,7 @@ function strategyBehavior(pieceId) {
       return rookBehavior;
     case KING:
       return kingBehavior;
+    case EMPTY:
+      return squareBehavior;
   }
 }
