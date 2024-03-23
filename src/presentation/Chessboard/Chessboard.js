@@ -1,8 +1,10 @@
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import "./Chessboard.css";
 import Piece from "../pieces/Piece";
 import { flatIcons } from "../pieces/IconCatalog";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { WHITE_PIECE } from "../../core/domain/Pieces";
+import { clearSelection } from "../../redux/reducers";
 
 function buildUIBoard(board, marks) {
   return board.map((p, index) =>
@@ -16,10 +18,24 @@ function buildUIBoard(board, marks) {
 }
 
 function Chessboard() {
+  const dispatch = useDispatch();
+  const isWhiteTurn = useSelector((state) => state.game.turn === WHITE_PIECE);
   const board = useSelector((state) => state.game.board);
   const marks = useSelector((state) => state.game.availableMovements);
   const selection = useSelector((state) => state.game.selection.pieceId);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        dispatch(clearSelection());
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
 
   const handleMouseMove = (event) => {
     const containerRect = event.currentTarget.getBoundingClientRect();
@@ -29,13 +45,13 @@ function Chessboard() {
     });
   };
 
-  const distribution = buildUIBoard(board, marks);
+  const distribution = isWhiteTurn ? buildUIBoard(board, marks): buildUIBoard(board, marks).reverse();
 
   const uiBoard = Array.from({ length: 64 }, (_, index) => (
     <div
       key={index}
       className={`size-20 flex justify-center items-center ${
-        (index - parseInt(index / 8)) % 2 ? "bg-slate-400" : ""
+        ((index - parseInt(index / 8)) % 2) ^ isWhiteTurn ? "bg-slate-400" : ""
       }`}
     >
       {distribution[index]}

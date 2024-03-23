@@ -74,5 +74,19 @@ export function getPieceWithoutColor(pieceId) {
 }
 
 export function getPieceColor(pieceId) {
-  return pieceId >= BLACK_PIECE ? BLACK_PIECE : WHITE_PIECE;
+  return pieceId >= BLACK_PIECE
+    ? BLACK_PIECE
+    : pieceId >= WHITE_PIECE
+    ? WHITE_PIECE
+    : EMPTY;
+}
+
+export function tooglePieceColor(pieceId) {
+  return getPieceColor(pieceId) === WHITE_PIECE
+    ? pieceId + WHITE_PIECE
+    : pieceId - WHITE_PIECE;
+}
+
+export function getPieceIdWithoutColor(pieceId) {
+  return pieceId % WHITE_PIECE;
 }
