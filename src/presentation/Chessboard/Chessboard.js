@@ -23,6 +23,7 @@ function Chessboard() {
   const board = useSelector((state) => state.game.board);
   const marks = useSelector((state) => state.game.availableMovements);
   const selection = useSelector((state) => state.game.selection.pieceId);
+  const isCheckmate = useSelector((state) => state.game.isCheckmate);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
@@ -45,13 +46,13 @@ function Chessboard() {
     });
   };
 
-  const distribution = isWhiteTurn ? buildUIBoard(board, marks): buildUIBoard(board, marks).reverse();
+  const distribution = isWhiteTurn ? buildUIBoard(board, marks): buildUIBoard(board, marks);//.reverse();
 
   const uiBoard = Array.from({ length: 64 }, (_, index) => (
     <div
       key={index}
       className={`size-20 flex justify-center items-center ${
-        ((index - parseInt(index / 8)) % 2) ^ isWhiteTurn ? "bg-slate-400" : ""
+        ((index - parseInt(index / 8)) % 2) /*^ isWhiteTurn */ ? "bg-slate-400" : ""
       }`}
     >
       {distribution[index]}
@@ -60,6 +61,11 @@ function Chessboard() {
 
   return (
     <div className="grid grid-cols-8 w-fit" onMouseMove={handleMouseMove}>
+      {isCheckmate && (
+      <div className="absolute bg-rose-950 text-white p-2 rounded-lg">
+        Checkmate!
+      </div>
+      )}
       {uiBoard}
       {selection !== -1 && (
         <div

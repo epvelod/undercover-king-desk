@@ -2,8 +2,10 @@ import { createSlice } from "@reduxjs/toolkit";
 import { initialBoard } from "../core/usecases/Board";
 import {
   isCheck,
+  isCheckmate,
   move,
   pieceStrategyBehavior,
+  preventCheck,
 } from "../core/usecases/PieceBehavior";
 import {
   BLACK_PIECE,
@@ -23,6 +25,7 @@ const initialState = {
   availableMovements: [],
   playedMovements: [],
   turn: WHITE_PIECE,
+  isCheckmate: false,
 };
 
 const gameSlice = createSlice({
@@ -41,15 +44,18 @@ const gameSlice = createSlice({
           playedMovements,
         });
         state.playedMovements.push({
-          pieceId,
+          pieceId: state.selection.pieceId,
           from: state.selection.position,
           to: position,
         });
         state.availableMovements = [];
         state.turn = state.turn === WHITE_PIECE ? BLACK_PIECE : WHITE_PIECE;
         state.selection = { pieceId: -1, position: -1 };
-
-        console.log(isCheck(state.board, state.turn) ? "CHECK" : "NO CHECK");
+        state.isCheckmate = isCheckmate({
+          board: state.board,
+          turn: state.turn,
+          playedMovements: state.playedMovements,
+        });
       } else if (getPieceColor(pieceId) === state.turn) {
         const getAvailableMovements = pieceStrategyBehavior(pieceId);
         const availableMovements = getAvailableMovements({
@@ -59,7 +65,7 @@ const gameSlice = createSlice({
           playedMovements,
         });
 
-        state.availableMovements = availableMovements || [];
+        state.availableMovements = preventCheck({ board, from: position, movements: availableMovements, turn: state.turn });
         state.selection = { pieceId, position };
       }
     },

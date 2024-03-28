@@ -10,6 +10,7 @@ import {
   ROOK,
   WHITE_PIECE,
   WHITE_ROOK,
+  getName,
   getPieceColor,
   getPieceWithoutColor,
   knight,
@@ -109,6 +110,7 @@ function pawnBehavior({ board, position, pieceId, playedMovements }) {
 
   return [
     ...diagonal,
+    ...enPassant({ board, position, pieceId, playedMovements }),
     ...availableMovesByDirection(
       { board, position, pieceId },
       direction,
@@ -228,6 +230,7 @@ function rookBehavior({ board, position, pieceId, playedMovements }) {
 
 function squareBehavior({ board, position, pieceId, playedMovements }) {}
 
+
 export function pieceStrategyBehavior(pieceId) {
   switch ((pieceId % WHITE_PIECE) % BLACK_PIECE) {
     case BISHOP:
@@ -258,14 +261,46 @@ export function move({ board, from, to, playedMovements }) {
     board[rookPosition] = EMPTY;
     board[newRookPosition] = rook;
   }
+  if (isEnPassant({ board, from, to, playedMovements })) {
+    const lastMovement = playedMovements[playedMovements.length - 1];
+    const lastTo = lastMovement.to;
+    board[lastTo] = EMPTY;
+  }
 
   board[to] = pieceId;
   board[from] = EMPTY;
   return board;
 }
 
+export function preventCheck({board, from, movements, turn}) {
+  if (!movements) {
+    return [];
+  }
+
+  return movements.filter((movement) => {
+    let newBoard = [...board];
+    newBoard = move({ board: newBoard, from, to: movement, playedMovements: [] });
+    console.log(movement);
+    return !isCheck(newBoard, turn);
+  });
+}
+
 function isCastling({ pieceId, from, to}) {
   return getPieceWithoutColor(pieceId) === KING && Math.abs(from - to) === 2;
+}
+
+function isEnPassant({ board, from, to, playedMovements }) {
+  if (!playedMovements || playedMovements.length < 2) {
+    return false;
+  }
+  if(getPieceWithoutColor(board[from]) !== PAWN) {
+    return false;
+  }
+  if(getPieceWithoutColor(playedMovements[playedMovements.length - 1].pieceId) !== PAWN) {
+    return false;
+  }
+  const enPassantMovements = enPassant({ board, position: from, pieceId: board[from], playedMovements });
+  return enPassantMovements.includes(to);
 }
 
 function castling({ board, position, pieceId, playedMovements }) {
@@ -316,6 +351,25 @@ function castling({ board, position, pieceId, playedMovements }) {
   return movements;
 }
 
+function enPassant({ board, position, pieceId, playedMovements }) {
+  if (!playedMovements || playedMovements.length === 0) {
+    return [];
+  }
+  const lastMovement = playedMovements[playedMovements.length - 1];
+  const lastPieceId = lastMovement.pieceId;
+  const lastFrom = lastMovement.from;
+  const lastTo = lastMovement.to;
+
+  if (
+    getPieceWithoutColor(lastPieceId) === PAWN &&
+    Math.abs(lastFrom - lastTo) === 16 &&
+    Math.abs(lastTo - position) === 1
+  ) {
+    return [lastTo + (getPieceColor(pieceId) === WHITE_PIECE ? -8 : 8)];
+  }
+  return [];
+}
+
 export function isCheckForPosition({ board, position, pieceId, playedMovements }) {
   const colorPiece = getPieceColor(pieceId);
   const colorOponent = tooglePieceColor(colorPiece);
@@ -339,11 +393,31 @@ export function isCheck( board, turn ) {
   return isCheckForPosition({ board, position: kingPosition, pieceId: board[kingPosition], playedMovements: [] });
 }
 
+export function isCheckmate({ board, turn, playedMovements }) {
+  const oponentPieces = board
+    .map((piece, position) => [piece, position])
+    .filter(
+      ([piece]) =>
+        getPieceColor(piece) === turn
+    );
+  const allPosibleOptions = oponentPieces.map(([pieceId, position]) => {
+    const getAvailableMovements = pieceStrategyBehavior(pieceId);
+    const availableMovements = getAvailableMovements({
+      board,
+      position,
+      pieceId,
+      playedMovements,
+    });
+    const movements = preventCheck({ board, from: position, movements: availableMovements, turn });
+
+    return movements;
+  }).reduce((acc, item) => acc.concat(item), []);
+  return allPosibleOptions.length === 0;
+}
+
 /**
  * 
  * TODO:
- * - implement castling : in progress
- * - implement en passant
  * - verify movements to avoid check
  * - implement checkmate
  * - implement stalemate
